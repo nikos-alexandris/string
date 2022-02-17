@@ -22,6 +22,15 @@ String
 string_empty();
 
 /*
+ * Constructs a String with the given capacity
+ * and stores it in s.
+ *
+ * Returns -1 on error; 0 on success.
+ */
+int
+string_from_capacity(size_t capacity, String *s);
+
+/*
  * Constructs a String from a null terminated
  * c string and stores it in s.
  *

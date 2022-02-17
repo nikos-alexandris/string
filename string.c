@@ -15,6 +15,21 @@ string_empty()
 }
 
 int
+string_from_capacity(size_t capacity, String *s)
+{
+	String str;
+
+	str.__size = 0;
+	str.__capacity = capacity;
+	if ((str.__buffer = malloc(str.__capacity * sizeof(char))) == NULL)
+		return -1;
+
+	*s = str;
+
+	return 0;
+}
+
+int
 string_from_cstr(const char *cs, String *s)
 {
 	String str;
