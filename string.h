@@ -10,8 +10,8 @@ typedef struct String {
 	size_t __capacity;
 } String;
 
-#define STRING_FMT SV_FMT
-#define STRING_ARG(s) SV_ARG((s).sv)
+#define STRING_FMT "%.*s"
+#define STRING_ARG(s) (int)(s).__size, (s).__buffer
 
 /*
  * Returns an empty String.
