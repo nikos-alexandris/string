@@ -258,9 +258,62 @@ string_move(String *src, String *dst)
 }
 
 int
+string_cmp(String s1, String s2)
+{
+	return sv_cmp(string_to_sv(s1), string_to_sv(s2));
+}
+
+bool
+string_split(String s, char delim, StrView *pre, StrView *post)
+{
+	return sv_split(string_to_sv(s), delim, pre, post);
+}
+
+bool
+string_split_n(String s, char delim, size_t n, StrView *pre, StrView *post)
+{
+	return sv_split_n(string_to_sv(s), delim, n, pre, post);
+}
+
+bool
+string_contains(String s, char c)
+{
+	return sv_contains(string_to_sv(s), c);
+}
+
+bool
+string_first_occ(String s, char c, size_t *idx)
+{
+	return sv_first_occ(string_to_sv(s), c, idx);
+}
+
+bool
+string_last_occ(String s, char c, size_t *idx)
+{
+	return sv_last_occ(string_to_sv(s), c, idx);
+}
+
+bool
+string_starts_with(String s, StrView prefix)
+{
+	return sv_starts_with(string_to_sv(s), prefix);
+}
+
+bool
+string_ends_with(String s, StrView postfix)
+{
+	return sv_ends_with(string_to_sv(s), postfix);
+}
+
+size_t
+string_count(String s, char c)
+{
+	return sv_count(string_to_sv(s), c);
+}
+
+int
 string_concat(String s1, String s2, String *dst)
 {
-	size_t cap;
 	String s;
 
 	s.__size = s.__capacity = s1.__size + s2.__size;

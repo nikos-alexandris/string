@@ -129,6 +129,87 @@ void
 string_move(String *src, String *dst);
 
 /*
+ * strcmp for String
+ */
+int
+string_cmp(String s1, String s2);
+
+/*
+ * Splits the string into the part before the delimiter and
+ * the part after the delimiter, and assigns them to pre
+ * and post respectively.
+ *
+ * If the delimiter is found in the string, the function returns
+ * true, else it returns false.
+ *
+ * For example:
+ *
+ * `string_split(string_from_cstr("Hello!World", '!', &pre, &post);`
+ *
+ * will return true, and will assign "Hello" to pre, and "World" to post,
+ * whereas
+ *
+ * `string_split(string_from_cstr("Hello World", '!', &prem &post);`
+ *
+ * will return false, and will assign "Hello World" to pre, and
+ * post will get assigned an empty string starting at the character
+ * after the end of s.
+ *
+ * Any or both of the pre and post args can be null.
+ */
+bool
+string_split(String s, char delim, StrView *pre, StrView *post);
+
+/*
+ * Same as string_split, but only checks the first n characters for the
+ * delimiter
+ */
+bool
+string_split_n(String s, char delim, size_t n, StrView *pre, StrView *post);
+
+/*
+ * Checks if s contains the character c
+ */
+bool
+string_contains(String s, char c);
+
+/*
+ * Returns true if s contains the character c, and assigns its first occurrence
+ * index to idx. Else, it returns false.
+ *
+ * idx can be null
+ */
+bool
+string_first_occ(String s, char c, size_t *idx);
+
+/*
+ * Returns true if s contains the character c, and assigns its last occurrence
+ * index to idx. Else, it returns false.
+ *
+ * idx can be null
+ */
+bool
+string_last_occ(String s, char c, size_t *idx);
+
+/*
+ * Returns true if prefix is a prefix of s, else returns false
+ */
+bool
+string_starts_with(String s, StrView prefix);
+
+/*
+ * Returns true if postfix is a postfix of s, else returns false
+ */
+bool
+string_ends_with(String s, StrView postfix);
+
+/*
+ * Returns the number of occurrences of c in s
+ */
+size_t
+string_count(String s, char c);
+
+/*
  * Concatenates s1 and s2 and stores the result
  * in dst.
  *
@@ -145,8 +226,8 @@ string_free(String *s);
 
 /*
  * Checks if string is empty. This function only
- * checks if the __size of the string is 0, not its
- * __capacity. In other words, if you want to check
+ * checks if the size of the string is 0, not its
+ * capacity. In other words, if you want to check
  * if s should be freed, you should use string_is_allocated.
  */
 bool
