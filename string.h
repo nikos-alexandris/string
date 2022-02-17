@@ -62,13 +62,6 @@ string_from_sv(StrView sv, String *s);
  * the result in s.
  *
  * Returns -1 on error; 0 on success.
- *
- * For example,
- *
- * ```
- * String s;
- * string_from_fmt(&s, "Hello, %s!", "world");
- * ```
  */
 int
 string_from_fmt(String *s, const char *template, ...);
