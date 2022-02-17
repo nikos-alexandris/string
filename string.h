@@ -80,6 +80,38 @@ StrView
 string_to_sv(String s);
 
 /*
+ * Returns the character in the idx-th position.
+ * This function does *not* bounds-check.
+ * For a safe alternative, use string_at_s.
+ */
+char
+string_at(String s, size_t idx);
+
+/*
+ * If idx is less than the string's size, returns
+ * 0 and assigns the idx-th character to c;
+ * else returns -1.
+ */
+int
+string_at_s(String s, size_t idx, char *c);
+
+/*
+ * Returns a reference to the character in the
+ * idx-th position. This function does *not* bounds-check.
+ * For a safe alternative, use string_at_ref_s.
+ */
+const char *
+string_at_ref(String s, size_t idx);
+
+/*
+ * If idx is less than the string's size, returns
+ * 0 and assigns the reference to the idx-th character
+ * to c; else returns -1.
+ */
+int
+string_at_ref_s(String s, size_t idx, const char **c);
+
+/*
  * Copies dst to src.
  * Both strings need to be freed separately.
  *

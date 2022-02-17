@@ -143,6 +143,30 @@ string_to_sv(String s)
 	return sv_from_parts(s.__buffer, s.__size);
 }
 
+char
+string_at(String s, size_t idx)
+{
+	return s.__buffer[idx];
+}
+
+int
+string_at_s(String s, size_t idx, char *c)
+{
+	return sv_at_s(string_to_sv(s), idx, c);
+}
+
+const char *
+string_at_ref(String s, size_t idx)
+{
+	return &s.__buffer[idx];
+}
+
+int
+string_at_ref_s(String s, size_t idx, const char **c)
+{
+	return sv_at_ref_s(string_to_sv(s), idx, c);
+}
+
 void
 string_free(String *s)
 {
@@ -161,7 +185,7 @@ string_is_empty(String s)
 bool
 string_is_allocated(String s)
 {
-	return s.__buffer == NULL;
+	return s.__buffer != NULL;
 }
 
 int
@@ -211,12 +235,12 @@ string_copy(String src, String *dst)
 {
 	String str;
 
-	if ((str.__buffer = malloc(src.__capacity * sizeof(char))) == NULL)
+	if ((str.__buffer = malloc(src.__size * sizeof(char))) == NULL)
 		return -1;
 
 	memmove(str.__buffer, src.__buffer, src.__size * sizeof(char));
 	str.__size = src.__size;
-	str.__capacity = src.__capacity;
+	str.__capacity = src.__size;
 
 	*dst = str;
 
