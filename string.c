@@ -11,7 +11,7 @@
 String
 string_empty()
 {
-	return (String){.buffer = NULL, .size = 0, .capacity = 0};
+	return (String){.__buffer = NULL, .__size = 0, .__capacity = 0};
 }
 
 int
@@ -19,17 +19,17 @@ string_from_cstr(const char *cs, String *s)
 {
 	String str;
 
-	str.size = str.capacity = strlen(cs);
+	str.__size = str.__capacity = strlen(cs);
 
-	if (str.capacity == 0) {
+	if (str.__capacity == 0) {
 		*s = string_empty();
 		return 0;
 	}
 
-	if ((str.buffer = malloc(str.capacity * sizeof(char))) == NULL)
+	if ((str.__buffer = malloc(str.__capacity * sizeof(char))) == NULL)
 		return -1;
 
-	memmove(str.buffer, cs, str.size);
+	memmove(str.__buffer, cs, str.__size);
 
 	*s = str;
 
@@ -51,9 +51,32 @@ string_from_stream(FILE *stream, int delim, String *s)
 	if (buffer[bytes - 1] == delim)
 		bytes--;
 
-	s->buffer = buffer;
-	s->size = (size_t)bytes;
-	s->capacity = (size_t)bytes;
+	s->__buffer = buffer;
+	s->__size = (size_t)bytes;
+	s->__capacity = (size_t)bytes;
+
+	return 0;
+}
+
+int
+string_from_file(const char *filename, String *s)
+{
+	String str;
+	FILE *file;
+
+	file = fopen(filename, "r");
+
+	if (file == NULL)
+		return -1;
+
+	if (string_from_stream(file, '\0', &str) == -1) {
+		fclose(file);
+		return -1;
+	}
+
+	fclose(file);
+
+	*s = str;
 
 	return 0;
 }
@@ -63,8 +86,8 @@ string_from_sv(StrView sv, String *s)
 {
 	String str;
 
-	str.size = str.capacity = sv.__size;
-	if ((str.buffer = malloc(str.size * sizeof(char))) == NULL)
+	str.__size = str.__capacity = sv.__size;
+	if ((str.__buffer = malloc(str.__size * sizeof(char))) == NULL)
 		return -1;
 
 	*s = str;
@@ -99,15 +122,15 @@ string_from_vfmt(String *s, const char *template, va_list args)
 		return -1;
 	}
 
-	str.buffer = malloc((bytes + 1) * sizeof(char));
+	str.__buffer = malloc((bytes + 1) * sizeof(char));
 
-	if (vsnprintf(str.buffer, bytes + 1, template, args_cp) < 0) {
+	if (vsnprintf(str.__buffer, bytes + 1, template, args_cp) < 0) {
 		va_end(args_cp);
-		free(str.buffer);
+		free(str.__buffer);
 		return -1;
 	}
 
-	str.size = str.capacity = bytes;
+	str.__size = str.__capacity = bytes;
 	*s = str;
 
 	va_end(args_cp);
@@ -117,60 +140,69 @@ string_from_vfmt(String *s, const char *template, va_list args)
 StrView
 string_to_sv(String s)
 {
-	return sv_from_parts(s.buffer, s.size);
+	return sv_from_parts(s.__buffer, s.__size);
 }
 
 void
 string_free(String *s)
 {
-	free(s->buffer);
-	s->buffer = NULL;
-	s->size = 0;
-	s->capacity = 0;
+	free(s->__buffer);
+	s->__buffer = NULL;
+	s->__size = 0;
+	s->__capacity = 0;
 }
 
 bool
 string_is_empty(String s)
 {
-	return s.size == 0;
+	return s.__size == 0;
+}
+
+bool
+string_is_allocated(String s)
+{
+	return s.__buffer == NULL;
 }
 
 int
 string_push(String *s, char c)
 {
-	if (s->size == s->capacity) {
-		s->capacity = s->capacity == 0 ? INITIAL_CAPACITY
-					       : s->capacity * GROWTH_FACTOR;
+	if (s->__size == s->__capacity) {
+		s->__capacity = s->__capacity == 0
+				? INITIAL_CAPACITY
+				: s->__capacity * GROWTH_FACTOR;
 		if (
-		  (s->buffer = realloc(s->buffer, s->capacity * sizeof(char)))
+		  (s->__buffer =
+		     realloc(s->__buffer, s->__capacity * sizeof(char)))
 		  == NULL)
 			return -1;
 	}
-	s->buffer[s->size++] = c;
+	s->__buffer[s->__size++] = c;
 	return 0;
 }
 
 int
 string_pop(String *s, char *c)
 {
-	if (s->size == 0)
+	if (s->__size == 0)
 		return -1;
-	*c = s->buffer[--s->size];
+	*c = s->__buffer[--s->__size];
 	return 0;
 }
 
 int
 string_append(String *s, String src)
 {
-	if (s->size + src.size > s->capacity) {
-		s->capacity = s->size + src.size;
+	if (s->__size + src.__size > s->__capacity) {
+		s->__capacity = s->__size + src.__size;
 		if (
-		  (s->buffer = realloc(s->buffer, s->capacity * sizeof(char)))
+		  (s->__buffer =
+		     realloc(s->__buffer, s->__capacity * sizeof(char)))
 		  == NULL)
 			return -1;
 	}
-	memmove(s->buffer + s->size, src.buffer, src.size);
-	s->size += src.size;
+	memmove(s->__buffer + s->__size, src.__buffer, src.__size);
+	s->__size += src.__size;
 	return 0;
 }
 
@@ -179,12 +211,12 @@ string_copy(String src, String *dst)
 {
 	String str;
 
-	if ((str.buffer = malloc(src.capacity * sizeof(char))) == NULL)
+	if ((str.__buffer = malloc(src.__capacity * sizeof(char))) == NULL)
 		return -1;
 
-	memmove(str.buffer, src.buffer, src.size * sizeof(char));
-	str.size = src.size;
-	str.capacity = src.capacity;
+	memmove(str.__buffer, src.__buffer, src.__size * sizeof(char));
+	str.__size = src.__size;
+	str.__capacity = src.__capacity;
 
 	*dst = str;
 
@@ -194,9 +226,9 @@ string_copy(String src, String *dst)
 void
 string_move(String *src, String *dst)
 {
-	dst->buffer = src->buffer;
-	dst->size = src->size;
-	dst->capacity = src->capacity;
+	dst->__buffer = src->__buffer;
+	dst->__size = src->__size;
+	dst->__capacity = src->__capacity;
 
 	*src = string_empty();
 }
@@ -207,8 +239,8 @@ string_concat(String s1, String s2, String *dst)
 	size_t cap;
 	String s;
 
-	s.size = s.capacity = s1.size + s2.size;
-	if ((s.buffer = malloc(s.capacity * sizeof(char))) == NULL)
+	s.__size = s.__capacity = s1.__size + s2.__size;
+	if ((s.__buffer = malloc(s.__capacity * sizeof(char))) == NULL)
 		return -1;
 
 	*dst = s;
