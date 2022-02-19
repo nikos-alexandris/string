@@ -127,6 +127,18 @@ string_free(String *s)
 	*s = string_empty();
 }
 
+size_t
+string_size(String s)
+{
+	return s.__size;
+}
+
+size_t
+string_capacity(String s)
+{
+	return s.__capacity;
+}
+
 bool
 string_is_empty(String s)
 {
@@ -136,13 +148,17 @@ string_is_empty(String s)
 bool
 string_is_null(String s)
 {
-	return s.__buffer == NULL && s.__size == SIZE_MAX && s.__capacity == SIZE_MAX;
+	return s.__buffer == NULL && s.__size == SIZE_MAX
+	    && s.__capacity == SIZE_MAX;
 }
 
 int
 string_cmp(String l, String r)
 {
-	return strncmp(l.__buffer, r.__buffer, l.__size < r.__size ? l.__size : r.__size);
+	return strncmp(
+	  l.__buffer,
+	  r.__buffer,
+	  l.__size < r.__size ? l.__size : r.__size);
 }
 
 bool
@@ -185,7 +201,10 @@ string_insert_sv(String *s, size_t idx, StrView v)
 			return;
 	}
 
-	memmove(&s->__buffer[idx + v.__size], &s->__buffer[idx], s->__size - idx);
+	memmove(
+	  &s->__buffer[idx + v.__size],
+	  &s->__buffer[idx],
+	  s->__size - idx);
 	memmove(&s->__buffer[idx], v.__buffer, v.__size);
 
 	s->__size += v.__size;

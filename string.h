@@ -36,7 +36,7 @@ String
 string_from_cstr(const char *buf);
 
 /**
- * @brief Creates a string with the given __capacity.
+ * @brief Creates a string with the given capacity.
  * @Errors
  * This function allocates space, so it can fail. To determine if it failed,
  * use string_is_null() on the returned String.
@@ -87,6 +87,18 @@ string_free(String *s);
 /* Queries */
 
 /**
+ * @brief Returns the size of s.
+ */
+size_t
+string_size(String s);
+
+/**
+ * @brief Returns the capacity of s.
+ */
+size_t
+string_capacity(String s);
+
+/**
  * Checks if s is empty.
  */
 bool
@@ -105,7 +117,7 @@ string_is_null(String s);
 /**
  * @brief Returns the idx-th char in s.
  * @Undefined
- * Undefined behaviour if idx is less than or equal to the __size of s.
+ * Undefined behaviour if idx is less than or equal to the size of s.
  */
 char
 string_at(String s, size_t idx);
@@ -113,7 +125,7 @@ string_at(String s, size_t idx);
 /**
  * @brief Returns a reference to the idx-th char in s
  * @Undefined
- * Undefined behaviour if idx is less than or equal to the __size of s.
+ * Undefined behaviour if idx is less than or equal to the size of s.
  */
 char *
 string_ref(String s, size_t idx);
@@ -123,7 +135,7 @@ string_ref(String s, size_t idx);
 /**
  * @brief Inserts c into the idx-th position of s.
  * @Errors This function fails if idx is larger or
- * equal to the __size of s, or because of a potential
+ * equal to the size of s, or because of a potential
  * allocation failure. To determine if it failed, use
  * string_is_null() on s after the call.
  * @Undefined Undefined behaviour is caused if s is NULL.
@@ -134,7 +146,7 @@ string_insert(String *s, size_t idx, char c);
 /**
  * @brief Inserts a copy of v into the idx-th position of s.
  * @Errors This function fails if idx is larger or equal to the
- * __size of s, or because of a potential allocation failure. To
+ * size of s, or because of a potential allocation failure. To
  * determine if it failed, use string_is_null() on s after the call.
  * @Undefined Undefined behaviour is caused if s is NULL.
  */
@@ -172,7 +184,7 @@ string_pop(String *s);
 /**
  * @brief Removes and returns the idx-th character in s.
  * @Undefined Undefined behaviour is caused if s is NULL, if
- * s is empty, or if idx is greater than or equal to the __size
+ * s is empty, or if idx is greater than or equal to the size
  * of s.
  */
 char
