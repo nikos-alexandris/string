@@ -72,6 +72,7 @@ string_move(String *s);
 
 /**
  * Constructs an StrView from s.
+ * @Warning If s is freed, the returned StrView is invalidated.
  */
 StrView
 string_to_sv(String s);
