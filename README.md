@@ -6,21 +6,15 @@ This library defines the struct `String`, which is meant to be used to handle he
 
 # Dependencies
 
-This library depends on my [string view library](https://github.com/nikos-alexandris/str_view),
-and adds it as a submodule.
+This library depends on my [string view library](https://github.com/nikos-alexandris/str_view).
 
 # Quick Start
 
-Clone the repo in your project
+Clone the str_view repo and this repo into the same directory
 
 ```shell
-git clone --recursive https://github.com/nikos-alexandris/string
-```
-
-or add it as a submodule in a git project
-
-```shell
-git submodule add https://github.com/nikos-alexandris/string
+git clone https://github.com/nikos-alexandris/str_view
+git clone https://github.com/nikos-alexandris/string
 ```
 
 and simply include the `string.h` header

@@ -1,8 +1,8 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include <stdio.h>
-#include "str_view/str_view.h"
+#include <stddef.h>
+#include "../str_view/str_view.h"
 
 typedef struct String {
 	char *__buffer;
@@ -13,264 +13,169 @@ typedef struct String {
 #define STRING_FMT "%.*s"
 #define STRING_ARG(s) (int)(s).__size, (s).__buffer
 
-/*
- * Returns an empty String.
- *
- * The empty string is not allocated.
+/* Constructors */
+
+/**
+ * @brief Returns an empty String
  */
 String
 string_empty();
 
-/*
- * Constructs a String with the given capacity
- * and stores it in s.
- *
- * Returns -1 on error; 0 on success.
+/**
+ * @brief Creates a String from a null terminated c string.
+ * @Errors
+ * This function allocates space, so it can fail.
+ * To determine if it failed, use string_is_null() on the
+ * returned String.
+ * @Undefined
+ * Undefined behaviour if buf is NULL
+ * @Warning buf @b must be null terminated, because the
+ * function uses strlen to determine its length.
  */
-int
-string_from_capacity(size_t capacity, String *s);
+String
+string_from_cstr(const char *buf);
 
-/*
- * Constructs a String from a null terminated
- * c string and stores it in s.
- *
- * Returns -1 on error; 0 on success.
+/**
+ * @brief Creates a string with the given __capacity.
+ * @Errors
+ * This function allocates space, so it can fail. To determine if it failed,
+ * use string_is_null() on the returned String.
  */
-int
-string_from_cstr(const char *cs, String *s);
+String
+string_with_capacity(size_t capacity);
 
-/*
- * Constructs a String from a stream and a delimiter and
- * stores the result in s.
- * The resulting String does not contain the delimiter.
- *
- * Returns -1 on error; 0 on success.
+/**
+ * @brief Creates a String from an StrView.
+ * @Errors
+ * This function allocates space, so it can fail.
+ * To determine if it failed, use string_is_null() on the
+ * returned String.
  */
-int
-string_from_stream(FILE *stream, int delim, String *s);
+String
+string_from_sv(StrView s);
 
-/*
- * Loads a whole file into s.
- *
- * Returns -1 on error; 0 on success.
+/**
+ * @brief Copies s to a new String
+ * @Errors
+ * This function allocates space, so it can fail. To determine if it failed,
+ * use string_is_null() on the returned String.
  */
-int
-string_from_file(const char *filename, String *s);
+String
+string_copy(String s);
 
-/*
- * Constructs a String from an StrView and stores the
- * result in s.
- *
- * Returns -1 on error; 0 on success.
+/**
+ * @brief Moves s to the returned String. Only the returned String must
+ * be freed.
  */
-int
-string_from_sv(StrView sv, String *s);
+String
+string_move(String *s);
 
-/*
- * Constructs a String from a formatted string and stores
- * the result in s.
- *
- * Returns -1 on error; 0 on success.
- */
-int
-string_from_fmt(String *s, const char *template, ...);
-
-/*
- * Same as string_from_fmt but takes the variadic args as a va_list
- */
-int
-string_from_vfmt(String *s, const char *template, va_list args);
-
-/*
- * Constructs an StrView from s. If s is later freed, the
- * resulting StrView becomes invalidated
+/**
+ * Constructs an StrView from s.
  */
 StrView
 string_to_sv(String s);
 
-/*
- * Returns the character in the idx-th position.
- * This function does *not* bounds-check.
- * For a safe alternative, use string_at_s.
- */
-char
-string_at(String s, size_t idx);
+/* Destructor */
 
-/*
- * If idx is less than the string's size, returns
- * 0 and assigns the idx-th character to c;
- * else returns -1.
- */
-int
-string_at_s(String s, size_t idx, char *c);
-
-/*
- * Returns a reference to the character in the
- * idx-th position. This function does *not* bounds-check.
- * For a safe alternative, use string_at_ref_s.
- */
-const char *
-string_at_ref(String s, size_t idx);
-
-/*
- * If idx is less than the string's size, returns
- * 0 and assigns the reference to the idx-th character
- * to c; else returns -1.
- */
-int
-string_at_ref_s(String s, size_t idx, const char **c);
-
-/*
- * Copies dst to src.
- * Both strings need to be freed separately.
- *
- * Returns -1 on error; 0 on success.
- */
-int
-string_copy(String src, String *dst);
-
-/*
- * Moves dst to src.
- * src becomes invalidated, and only dst
- * must be freed.
- */
-void
-string_move(String *src, String *dst);
-
-/*
- * strcmp for String
- */
-int
-string_cmp(String s1, String s2);
-
-/*
- * Splits the string into the part before the delimiter and
- * the part after the delimiter, and assigns them to pre
- * and post respectively.
- *
- * If the delimiter is found in the string, the function returns
- * true, else it returns false.
- *
- * For example:
- *
- * `string_split(string_from_cstr("Hello!World", '!', &pre, &post);`
- *
- * will return true, and will assign "Hello" to pre, and "World" to post,
- * whereas
- *
- * `string_split(string_from_cstr("Hello World", '!', &prem &post);`
- *
- * will return false, and will assign "Hello World" to pre, and
- * post will get assigned an empty string starting at the character
- * after the end of s.
- *
- * Any or both of the pre and post args can be null.
- */
-bool
-string_split(String s, char delim, StrView *pre, StrView *post);
-
-/*
- * Same as string_split, but only checks the first n characters for the
- * delimiter
- */
-bool
-string_split_n(String s, char delim, size_t n, StrView *pre, StrView *post);
-
-/*
- * Checks if s contains the character c
- */
-bool
-string_contains(String s, char c);
-
-/*
- * Returns true if s contains the character c, and assigns its first occurrence
- * index to idx. Else, it returns false.
- *
- * idx can be null
- */
-bool
-string_first_occ(String s, char c, size_t *idx);
-
-/*
- * Returns true if s contains the character c, and assigns its last occurrence
- * index to idx. Else, it returns false.
- *
- * idx can be null
- */
-bool
-string_last_occ(String s, char c, size_t *idx);
-
-/*
- * Returns true if prefix is a prefix of s, else returns false
- */
-bool
-string_starts_with(String s, StrView prefix);
-
-/*
- * Returns true if postfix is a postfix of s, else returns false
- */
-bool
-string_ends_with(String s, StrView postfix);
-
-/*
- * Returns the number of occurrences of c in s
- */
-size_t
-string_count(String s, char c);
-
-/*
- * Concatenates s1 and s2 and stores the result
- * in dst.
- *
- * Returns -1 on error; 0 on success.
- */
-int
-string_concat(String s1, String s2, String *dst);
-
-/*
- * Frees the memory occupied by s
+/**
+ * @brief Frees the memory allocated for s.
  */
 void
 string_free(String *s);
 
-/*
- * Checks if string is empty. This function only
- * checks if the size of the string is 0, not its
- * capacity. In other words, if you want to check
- * if s should be freed, you should use string_is_allocated.
+/* Queries */
+
+/**
+ * Checks if s is empty.
  */
 bool
 string_is_empty(String s);
 
-/*
- * Checks if s occupies memory. Use this function
- * to determine if s should be freed or not.
+/**
+ * @brief Checks if s is the null string. Note that string_empty() does
+ * not return a null string, so @code string_is_null(string_empty()) @endcode
+ * will return false.
  */
 bool
-string_is_allocated(String s);
+string_is_null(String s);
 
-/*
- * Pushes c to s.
- *
- * Returns -1 on error; 0 on success.
+/* Accessors */
+
+/**
+ * @brief Returns the idx-th char in s.
+ * @Undefined
+ * Undefined behaviour if idx is less than or equal to the __size of s.
  */
-int
+char
+string_at(String s, size_t idx);
+
+/**
+ * @brief Returns a reference to the idx-th char in s
+ * @Undefined
+ * Undefined behaviour if idx is less than or equal to the __size of s.
+ */
+char *
+string_ref(String s, size_t idx);
+
+/* Modifiers */
+
+/**
+ * @brief Inserts c into the idx-th position of s.
+ * @Errors This function fails if idx is larger or
+ * equal to the __size of s, or because of a potential
+ * allocation failure. To determine if it failed, use
+ * string_is_null() on s after the call.
+ * @Undefined Undefined behaviour is caused if s is NULL.
+ */
+void
+string_insert(String *s, size_t idx, char c);
+
+/**
+ * @brief Inserts a copy of v into the idx-th position of s.
+ * @Errors This function fails if idx is larger or equal to the
+ * __size of s, or because of a potential allocation failure. To
+ * determine if it failed, use string_is_null() on s after the call.
+ * @Undefined Undefined behaviour is caused if s is NULL.
+ */
+void
+string_insert_sv(String *s, size_t idx, StrView v);
+
+/**
+ * @brief Pushes c to the end of s.
+ * @Errors This function may allocate space, so it can fail.
+ * To determine if it failed, use string_is_null() on s after
+ * the call.
+ * @Undefined Undefined behaviour is caused if s is NULL.
+ */
+void
 string_push(String *s, char c);
 
-/*
- * Pops last char from s and stores it to c.
- *
- * Returns -1 on error; 0 on success.
+/**
+ * @brief Pushes a copy of v to the end of s
+ * @Errors This function may allocate space, so it can fail.
+ * To determine if it failed, use string_is_null() on s after
+ * the call.
+ * @Undefined Undefined behaviour is caused if s is NULL.
  */
-int
-string_pop(String *s, char *c);
+void
+string_push_sv(String *s, StrView v);
 
-/*
- * Appends src to s.
- *
- * Returns -1 on error; 0 on success.
+/**
+ * @brief Pops and returns the last character in s
+ * @Undefined Undefined behaviour is caused if s is NULL, or
+ * if s is empty.
  */
-int
-string_append(String *s, String src);
+char
+string_pop(String *s);
+
+/**
+ * @brief Removes and returns the idx-th character in s.
+ * @Undefined Undefined behaviour is caused if s is NULL, if
+ * s is empty, or if idx is greater than or equal to the __size
+ * of s.
+ */
+char
+string_remove(String *s, size_t idx);
 
 #endif /* STRING_H */
